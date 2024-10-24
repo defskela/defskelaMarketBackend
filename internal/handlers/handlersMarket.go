@@ -12,6 +12,10 @@ import (
 func (handler *Handler) GetAllMarkets(context *gin.Context) {
 	var markets []models.Market
 	handler.DB.Find(&markets)
+	if len(markets) == 0 {
+		context.JSON(http.StatusOK, gin.H{"message": "No markets found"})
+		return
+	}
 	context.JSON(http.StatusOK, markets)
 	fmt.Println("Markets fetched")
 }
@@ -39,6 +43,11 @@ func (handler *Handler) GetProductsByMarketID(context *gin.Context) {
 		return
 	}
 
+	if len(products) == 0 {
+		msgErr := fmt.Sprintf("No products found for market with ID %s", marketID)
+		context.JSON(http.StatusOK, gin.H{"message": msgErr})
+		return
+	}
 	// Возвращаем список продуктов
 	context.JSON(http.StatusOK, products)
 }
