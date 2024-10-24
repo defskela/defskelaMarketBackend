@@ -46,6 +46,7 @@ func main() {
 	r.POST("/createMarket", handler.CreateMarket)
 	r.GET("/products", handler.GetAllProducts)
 	r.POST("/createProduct", handler.CreateProduct)
+	r.GET("/markets/:id/products", handler.GetProductsByMarketID)
 
 	r.Run(":8080")
 }
