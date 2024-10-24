@@ -9,6 +9,7 @@ import (
 func InitRouter(handler *handlers.Handler) {
 	router := gin.Default()
 
+	router.HandleMethodNotAllowed = true
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "Welcome to MyShop API!"})
 	})
