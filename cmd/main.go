@@ -3,10 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 
 	"defskelaMarketBackend/internal/models"
+
+	handlers "defskelaMarketBackend/internal/handlers"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -16,34 +17,6 @@ import (
 
 var db *gorm.DB
 
-type Handler struct {
-	DB *gorm.DB
-}
-
-func NewHandler(db *gorm.DB) *Handler {
-	return &Handler{DB: db}
-}
-
-// Получить все продукты
-func (handler *Handler) GetAllProducts(context *gin.Context) {
-	var products []models.Product
-	handler.DB.Find(&products)
-	context.JSON(http.StatusOK, products)
-	fmt.Println("Products fetched")
-}
-
-// Добавить новый продукт
-func (handler *Handler) CreateProduct(context *gin.Context) {
-	var product models.Product
-	if err := context.ShouldBindJSON(&product); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	handler.DB.Create(&product)
-	context.JSON(http.StatusOK, product)
-	fmt.Println("Product created")
-}
-
 func initDB(connectionData string) {
 	var err error
 	db, err = gorm.Open(postgres.Open(connectionData), &gorm.Config{})
@@ -51,7 +24,7 @@ func initDB(connectionData string) {
 		log.Fatal("Failed to connect to the database:", err)
 	}
 	log.Println("Database connected")
-	db.AutoMigrate(&models.Product{})
+	db.AutoMigrate(&models.Product{}, &models.Market{})
 }
 
 func main() {
@@ -64,13 +37,15 @@ func main() {
 
 	r := gin.Default()
 
-	productHandler := NewHandler(db)
+	handler := handlers.NewHandler(db)
 
-	r.GET("/products", productHandler.GetAllProducts)
-	r.POST("/createProduct", productHandler.CreateProduct)
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "Welcome to MyShop API!"})
 	})
+	r.GET("/markets", handler.GetAllMarkets)
+	r.POST("/createMarket", handler.CreateMarket)
+	r.GET("/products", handler.GetAllProducts)
+	r.POST("/createProduct", handler.CreateProduct)
 
 	r.Run(":8080")
 }
