@@ -10,6 +10,11 @@ func InitRouter(handler *handlers.Handler) {
 	router := gin.Default()
 
 	router.HandleMethodNotAllowed = true
+
+	auth := router.Group("/auth")
+	{
+		auth.POST("/login", handler.Login)
+	}
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "Welcome to MyShop API!"})
 	})

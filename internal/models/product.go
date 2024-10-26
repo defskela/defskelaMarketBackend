@@ -4,8 +4,8 @@ import "gorm.io/gorm"
 
 type Product struct {
 	gorm.Model
-	Name     string
-	Price    float64
-	Stock    int
-	MarketID uint
+	Name     string  `json:"name"`
+	Price    float64 `json:"price"`
+	Stock    int     `json:"stock"`
+	MarketID uint    `json:"market_id"`
 }
