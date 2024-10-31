@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
@@ -36,8 +37,23 @@ func (handler *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	// Проверяем пользователя в базе данных (здесь предполагаем, что он уже есть)
-	user := models.User{}
+	var user models.User
+	result := handler.DB.Where("username = ?", input.Username).First(&user)
+	if result.Error != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials user"})
+		return
+	}
+
+	// Проверка пароля (предполагается, что пароли хранятся в хешированном виде)
+	// if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
+	// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+	// 	return
+	// }
+	if err := user.Password == input.Password; err != true {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
+	fmt.Println(user)
 	// Здесь следует добавить проверку пароля и существования пользователя
 
 	token, err := generateJWT(user.ID, jwtSecretKey)
@@ -45,6 +61,8 @@ func (handler *Handler) Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
 	}
+	user.Token = token
+	handler.DB.Save(&user)
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
