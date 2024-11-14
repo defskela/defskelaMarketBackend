@@ -3,9 +3,12 @@ package handlers
 import (
 	"defskelaMarketBackend/internal/models"
 	"fmt"
+	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (handler *Handler) Registration(context *gin.Context) {
@@ -14,12 +17,25 @@ func (handler *Handler) Registration(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	handler.DB.Create(&user)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("UP", user.Password)
+	user.Password = string(hashedPassword)
+	if err := handler.DB.Create(&user).Error; err != nil {
+		if strings.Contains(err.Error(), "duplicate key value") {
+			context.JSON(http.StatusOK, gin.H{"message": "Username already exists!"})
+			return
+		}
+		context.JSON(http.StatusBadRequest, err)
+		return
+	}
 	context.JSON(http.StatusOK, user)
 	fmt.Println("User registered")
 }
 
-// Получить все продукты
+// Получить всех юзеров
 func (handler *Handler) GetAllUsers(context *gin.Context) {
 	var users []models.User
 	handler.DB.Find(&users)

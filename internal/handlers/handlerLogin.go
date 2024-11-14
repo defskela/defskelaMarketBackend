@@ -11,6 +11,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func generateJWT(userID uint, secretKey []byte) (string, error) {
@@ -37,22 +38,23 @@ func (handler *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	var user models.User
+	user := new(models.User)
 	result := handler.DB.Where("username = ?", input.Username).First(&user)
 	if result.Error != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials user"})
 		return
 	}
 
-	// Проверка пароля (предполагается, что пароли хранятся в хешированном виде)
-	// if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
+	fmt.Println("UP:", user.Password, "IP:", input.Password)
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials (password)"})
+		return
+	}
+	// if err := user.Password == input.Password; err != true {
 	// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 	// 	return
 	// }
-	if err := user.Password == input.Password; err != true {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-		return
-	}
 	fmt.Println(user)
 	// Здесь следует добавить проверку пароля и существования пользователя
 
@@ -61,7 +63,7 @@ func (handler *Handler) Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
 	}
-	user.Token = token
+	user.Token = append(user.Token, token)
 	handler.DB.Save(&user)
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
