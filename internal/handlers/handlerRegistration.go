@@ -2,14 +2,25 @@ package handlers
 
 import (
 	"defskelaMarketBackend/internal/models"
+	"defskelaMarketBackend/utils"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
+
+var emailConfig = utils.EmailConfig{}
+
+func InitEmailConfig(host string, port string, email string, password string) {
+	emailConfig.Host = host
+	emailConfig.Port = port
+	emailConfig.Email = email
+	emailConfig.Password = password
+}
 
 func (handler *Handler) Registration(context *gin.Context) {
 	var user models.User
@@ -23,6 +34,7 @@ func (handler *Handler) Registration(context *gin.Context) {
 	}
 	fmt.Println("UP", user.Password)
 	user.Password = string(hashedPassword)
+
 	if err := handler.DB.Create(&user).Error; err != nil {
 		if strings.Contains(err.Error(), "duplicate key value") {
 			context.JSON(http.StatusOK, gin.H{"message": "Username already exists!"})
@@ -31,18 +43,23 @@ func (handler *Handler) Registration(context *gin.Context) {
 		context.JSON(http.StatusBadRequest, err)
 		return
 	}
-	context.JSON(http.StatusOK, user)
-	fmt.Println("User registered")
-}
 
-// Получить всех юзеров
-func (handler *Handler) GetAllUsers(context *gin.Context) {
-	var users []models.User
-	handler.DB.Find(&users)
-	if len(users) == 0 {
-		context.JSON(http.StatusOK, gin.H{"message": "No markets found"})
+	// Генерируем OTP
+	otp, err := utils.GenerateOTP()
+	if err != nil {
+		context.JSON(http.StatusOK, gin.H{"message": "Error creating OTP-code"})
 		return
 	}
-	context.JSON(http.StatusOK, users)
-	fmt.Println("Markets fetched")
+
+	user.OTP = otp
+	user.OTPCreatedAt = time.Now()
+
+	if err := emailConfig.SendEmailOTP(user.Email, otp); err != nil {
+		// Если не удалось отправить email, удаляем пользователя
+		fmt.Println(err)
+		handler.DB.Delete(&user)
+	}
+
+	context.JSON(http.StatusOK, user)
+	fmt.Println("User registered")
 }
