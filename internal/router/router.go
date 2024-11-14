@@ -24,7 +24,7 @@ func InitRouter(handler *handlers.Handler) {
 	router.POST("/createMarket", handler.CreateMarket)
 	router.GET("/products", handler.GetAllProducts)
 	router.POST("/createProduct", handler.CreateProduct)
-	router.GET("/markets/:id/products", handler.GetProductsByMarketID)
+	router.GET("/products/:market_id", handler.GetProductsByMarketID)
 
 	router.Run(":8080")
 }

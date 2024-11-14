@@ -35,7 +35,7 @@ func (handler *Handler) CreateMarket(context *gin.Context) {
 // Получить список продуктов по marketID
 func (handler *Handler) GetProductsByMarketID(context *gin.Context) {
 	var products []models.Product
-	marketID := context.Param("id") // Получаем ID магазина из параметров URL
+	marketID := context.Param("market_id") // Получаем ID магазина из параметров URL
 
 	// Выполняем запрос для получения всех продуктов с данным MarketID
 	if err := handler.DB.Where("market_id = ?", marketID).Find(&products).Error; err != nil {
