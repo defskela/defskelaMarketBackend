@@ -6,11 +6,21 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+)
+
+const (
+	errEmailInvalid    = "Invalid email format"
+	errPasswordLength  = "Password must be at least 8 characters long"
+	errPasswordUpper   = "Password must contain at least one uppercase letter"
+	errPasswordLower   = "Password must contain at least one lowercase letter"
+	errPasswordDigit   = "Password must contain at least one digit"
+	errPasswordSpecial = "Password must contain at least one special character"
 )
 
 var emailConfig = utils.EmailConfig{}
@@ -89,7 +99,6 @@ func (handler *Handler) IsTrueOTP(context *gin.Context) {
 // @Router /auth/registration [post]
 // @Security BearerAuth
 func (handler *Handler) Registration(context *gin.Context) {
-	// 1. Валидация входных данных
 	var requestData registrationData
 	if err := context.ShouldBindJSON(&requestData); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -99,6 +108,43 @@ func (handler *Handler) Registration(context *gin.Context) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(requestData.Password), bcrypt.DefaultCost)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Error processing password"})
+		return
+	}
+
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	if !emailRegex.MatchString(requestData.Email) {
+		context.JSON(http.StatusBadRequest, gin.H{"error": errEmailInvalid})
+		return
+	}
+
+	password := requestData.Password
+
+	if len(password) < 8 {
+		context.JSON(http.StatusBadRequest, gin.H{"error": errPasswordLength})
+		return
+	}
+
+	upperRegex := regexp.MustCompile(`[A-Z]`)
+	if !upperRegex.MatchString(password) {
+		context.JSON(http.StatusBadRequest, gin.H{"error": errPasswordUpper})
+		return
+	}
+
+	lowerRegex := regexp.MustCompile(`[a-z]`)
+	if !lowerRegex.MatchString(password) {
+		context.JSON(http.StatusBadRequest, gin.H{"error": errPasswordLower})
+		return
+	}
+
+	digitRegex := regexp.MustCompile(`[0-9]`)
+	if !digitRegex.MatchString(password) {
+		context.JSON(http.StatusBadRequest, gin.H{"error": errPasswordDigit})
+		return
+	}
+
+	specialRegex := regexp.MustCompile(`[!@#$%^&*(),.?":{}|<>]`)
+	if !specialRegex.MatchString(password) {
+		context.JSON(http.StatusBadRequest, gin.H{"error": errPasswordSpecial})
 		return
 	}
 
@@ -151,6 +197,7 @@ func (handler *Handler) Registration(context *gin.Context) {
 
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Registration successful. Please check your email for verification code",
+		"otp":     user.OTP,
 		"user_id": user.ID,
 		"token":   token,
 	})
