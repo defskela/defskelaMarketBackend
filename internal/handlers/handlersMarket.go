@@ -32,7 +32,16 @@ func (handler *Handler) CreateMarket(context *gin.Context) {
 	fmt.Println("Product created")
 }
 
-// Получить список продуктов по marketID
+// @Summary Продукты по ID
+// @Description Получить список продуктов по marketID
+// @Tags product
+// @Accept json
+// @Produce json
+// @Param market_id path int true "Market ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /products/{market_id} [get]
 func (handler *Handler) GetProductsByMarketID(context *gin.Context) {
 	var products []models.Product
 	marketID := context.Param("market_id") // Получаем ID магазина из параметров URL

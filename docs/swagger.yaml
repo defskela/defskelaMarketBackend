@@ -1,0 +1,138 @@
+definitions:
+  handlers.OTPRequest:
+    properties:
+      otp:
+        type: string
+    required:
+    - otp
+    type: object
+  handlers.registrationData:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://www.example.com/support
+  description: This is a sample server for My API.
+  termsOfService: http://example.com/terms/
+  title: My API
+  version: "1.0"
+paths:
+  /auth/otp-code:
+    post:
+      consumes:
+      - application/json
+      description: Для ввода кода подтверждения, который приходит на почту
+      parameters:
+      - description: OTPRequest data
+        in: body
+        name: OTPRequest
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.OTPRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Код подтверждения
+      tags:
+      - auth
+  /auth/registration:
+    post:
+      consumes:
+      - application/json
+      description: Для регистрации ребуется передать уникальный username, пароль и
+        уникальный email
+      parameters:
+      - description: registrationData data
+        in: body
+        name: registrationData
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.registrationData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Регистрация пользователя
+      tags:
+      - users
+      - auth
+  /products/{market_id}:
+    get:
+      consumes:
+      - application/json
+      description: Получить список продуктов по marketID
+      parameters:
+      - description: Market ID
+        in: path
+        name: market_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Продукты по ID
+      tags:
+      - product
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

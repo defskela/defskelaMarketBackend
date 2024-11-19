@@ -3,21 +3,21 @@ package models
 import (
 	"time"
 
-	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
 type User struct {
 	gorm.Model
-	Username     string         `gorm:"type:varchar(50);not null;unique" json:"username"`
-	Email        string         `gorm:"type:varchar(100);not null" json:"email"`
-	Password     string         `gorm:"type:varchar(255);not null" json:"password"`
-	IsAdmin      bool           `gorm:"default:false" json:"is_admin"`
-	OTP          string         `gorm:"type:varchar(6)" json:"otp"`
-	OTPCreatedAt time.Time      `json:"otp_created_at"`
-	Orders       []Order        `json:"orders,omitempty"` // One-to-Many relationship
-	Cart         Cart           `json:"cart,omitempty"`   // One-to-One relationship
-	Token        pq.StringArray `json:"token" gorm:"type:text[]"`
+	Username     string    `gorm:"type:varchar(50);not null;unique" json:"username"`
+	Email        string    `gorm:"type:varchar(100);not null;unique" json:"email"`
+	Password     string    `gorm:"type:varchar(255);not null" json:"password"`
+	IsAdmin      bool      `gorm:"default:false" json:"is_admin"`
+	OTP          string    `gorm:"type:varchar(6)" json:"otp"`
+	OTPCreatedAt time.Time `json:"otp_created_at"`
+	Orders       []Order   `json:"orders,omitempty"` // One-to-Many relationship
+	Cart         Cart      `json:"cart,omitempty"`   // One-to-One relationship
+	Token        string    `json:"token"`
+	IsActive     bool      `json:"is_active,omitempty"`
 }
 
 type Product struct {

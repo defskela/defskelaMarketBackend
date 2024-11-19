@@ -7,22 +7,11 @@ import (
 
 	"defskelaMarketBackend/internal/models"
 
-	"time"
+	"defskelaMarketBackend/utils"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
-
-func generateJWT(userID uint, secretKey []byte) (string, error) {
-	claims := jwt.MapClaims{}
-	claims["authorized"] = true
-	claims["user_id"] = userID
-	claims["exp"] = time.Now().Add(time.Hour * 24).Unix() // токен действует 24 часа
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(secretKey)
-}
 
 type LoginInput struct {
 	Username string `json:"username" binding:"required"`
@@ -58,12 +47,12 @@ func (handler *Handler) Login(c *gin.Context) {
 	fmt.Println(user)
 	// Здесь следует добавить проверку пароля и существования пользователя
 
-	token, err := generateJWT(user.ID, jwtSecretKey)
+	token, err := utils.GenerateJWT(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not generate token"})
 		return
 	}
-	user.Token = append(user.Token, token)
+	user.Token = token
 	handler.DB.Save(&user)
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
