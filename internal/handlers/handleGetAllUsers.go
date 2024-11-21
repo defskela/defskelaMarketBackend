@@ -13,7 +13,7 @@ func (handler *Handler) GetAllUsers(context *gin.Context) {
 	var users []models.User
 	handler.DB.Find(&users)
 	if len(users) == 0 {
-		context.JSON(http.StatusOK, gin.H{"message": "No markets found"})
+		context.JSON(http.StatusOK, gin.H{"message": "No users found"})
 		return
 	}
 	context.JSON(http.StatusOK, users)
