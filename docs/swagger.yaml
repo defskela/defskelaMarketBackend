@@ -19,6 +19,10 @@ definitions:
     - password
     - username
     type: object
+  models.Market:
+    type: object
+  models.Product:
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -44,17 +48,7 @@ paths:
           $ref: '#/definitions/handlers.OTPRequest'
       produces:
       - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
+      responses: {}
       security:
       - BearerAuth: []
       summary: Код подтверждения
@@ -75,6 +69,28 @@ paths:
           $ref: '#/definitions/handlers.registrationData'
       produces:
       - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Регистрация пользователя
+      tags:
+      - users
+      - auth
+  /createMarket:
+    post:
+      consumes:
+      - application/json
+      description: Данный запрос позволяет создать магазин, если формат данных соответствует
+        структуре models.Market
+      parameters:
+      - description: Market data
+        in: body
+        name: market
+        required: true
+        schema:
+          $ref: '#/definitions/models.Market'
+      produces:
+      - application/json
       responses:
         "200":
           description: OK
@@ -86,28 +102,34 @@ paths:
           schema:
             additionalProperties: true
             type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Регистрация пользователя
+      summary: Создание магазина
       tags:
-      - users
-      - auth
-  /products/{market_id}:
+      - markets
+  /createProduct:
+    post:
+      consumes:
+      - application/json
+      description: Данный запрос позволяет создать продукт, если формат данных соответствует
+        структуре models.Product
+      parameters:
+      - description: Product data
+        in: body
+        name: market
+        required: true
+        schema:
+          $ref: '#/definitions/models.Product'
+      produces:
+      - application/json
+      responses: {}
+      summary: Создание продукта
+      tags:
+      - products
+  /markets:
     get:
       consumes:
       - application/json
-      description: Получить список продуктов по marketID
-      parameters:
-      - description: Market ID
-        in: path
-        name: market_id
-        required: true
-        type: integer
+      description: Данный запрос позволяет получить список всех магазинов, их данных
+        и товаров внутри них
       produces:
       - application/json
       responses:
@@ -126,9 +148,52 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Продукты по ID
+      summary: Все магазины
       tags:
-      - product
+      - markets
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Данный запрос позволяет получить список всех продуктов и данных
+        о них
+      produces:
+      - application/json
+      responses: {}
+      summary: Все продукты
+      tags:
+      - products
+  /products/{market_id}:
+    get:
+      consumes:
+      - application/json
+      description: Данный запрос позволяет получить список товаров магазина по id
+        магазина
+      parameters:
+      - description: Market ID
+        in: path
+        name: market_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: Продукты по marketID
+      tags:
+      - products
+      - markets
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Данный запрос позволяет получить список всех пользователей и их
+        данных
+      produces:
+      - application/json
+      responses: {}
+      summary: Все пользователи
+      tags:
+      - users
 securityDefinitions:
   BearerAuth:
     description: Type "Bearer" followed by a space and JWT token

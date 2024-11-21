@@ -30,28 +30,30 @@ import (
 func InitRouter(handler *handlers.Handler) {
 	router := gin.Default()
 
+	router.HandleMethodNotAllowed = true
+
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "Welcome to MyShop API!"})
 	})
 	router.GET("/users", handler.GetAllUsers)
-	router.Use(middlewares.AuthMiddleware())
+	router.GET("/markets", handler.GetAllMarkets)
+	router.GET("/products", handler.GetAllProducts)
+	router.GET("/products/:market_id", handler.GetProductsByMarketID)
 
-	router.HandleMethodNotAllowed = true
+	router.POST("/createMarket", handler.CreateMarket)
+	router.POST("/createProduct", handler.CreateProduct)
 
 	auth := router.Group("/auth")
 	{
 		auth.POST("/registration", handler.Registration)
+
+		// Для получения id из токена
+		router.Use(middlewares.AuthMiddleware())
+
 		auth.POST("/otp-code", handler.IsTrueOTP)
 		auth.POST("/login", handler.Login)
 	}
-
-	// router.GET("/users", handler.GetAllUsers)
-	router.GET("/markets", handler.GetAllMarkets)
-	router.POST("/createMarket", handler.CreateMarket)
-	router.GET("/products", handler.GetAllProducts)
-	router.POST("/createProduct", handler.CreateProduct)
-	router.GET("/products/:market_id", handler.GetProductsByMarketID)
 
 	router.Run(":8080")
 }

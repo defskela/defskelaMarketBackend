@@ -46,8 +46,6 @@ type OTPRequest struct {
 // @Accept json
 // @Produce json
 // @Param OTPRequest body OTPRequest true "OTPRequest data"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
 // @Router /auth/otp-code [post]
 // @Security BearerAuth
 func (handler *Handler) IsTrueOTP(context *gin.Context) {
@@ -88,9 +86,6 @@ func (handler *Handler) IsTrueOTP(context *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param registrationData body registrationData true "registrationData data"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
 // @Router /auth/registration [post]
 // @Security BearerAuth
 func (handler *Handler) Registration(context *gin.Context) {

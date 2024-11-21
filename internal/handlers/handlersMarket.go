@@ -7,7 +7,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Получить все продукты
+// @Summary Все магазины
+// @Description Данный запрос позволяет получить список всех магазинов, их данных и товаров внутри них
+// @Tags markets
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Router /markets [get]
 func (handler *Handler) GetAllMarkets(context *gin.Context) {
 	var markets []models.Market
 	handler.DB.Find(&markets)
@@ -18,7 +26,15 @@ func (handler *Handler) GetAllMarkets(context *gin.Context) {
 	context.JSON(http.StatusOK, markets)
 }
 
-// Добавить новый магазин
+// @Summary Создание магазина
+// @Description Данный запрос позволяет создать магазин, если формат данных соответствует структуре models.Market
+// @Tags markets
+// @Accept json
+// @Produce json
+// @Param market body models.Market true "Market data"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /createMarket [post]
 func (handler *Handler) CreateMarket(context *gin.Context) {
 	var market models.Market
 	if err := context.ShouldBindJSON(&market); err != nil {
@@ -29,15 +45,12 @@ func (handler *Handler) CreateMarket(context *gin.Context) {
 	context.JSON(http.StatusOK, market)
 }
 
-// @Summary Продукты по ID
-// @Description Получить список продуктов по marketID
-// @Tags product
+// @Summary Продукты по marketID
+// @Description Данный запрос позволяет получить список товаров магазина по id магазина
+// @Tags products, markets
 // @Accept json
 // @Produce json
 // @Param market_id path int true "Market ID"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
 // @Router /products/{market_id} [get]
 func (handler *Handler) GetProductsByMarketID(context *gin.Context) {
 	var products []models.Product
