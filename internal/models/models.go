@@ -22,13 +22,13 @@ type User struct {
 
 type Product struct {
 	gorm.Model
-	Name        string   `gorm:"type:varchar(100);not null" json:"name"`
-	Description string   `gorm:"type:text" json:"description"`
-	Price       float64  `gorm:"type:decimal(10,2);not null" json:"price"`
-	Stock       int      `json:"stock"`
-	CategoryID  uint     `json:"category_id"`
-	Category    Category `gorm:"foreignKey:CategoryID" json:"category,omitempty"`
-	MarketID    uint     `gorm:"foreignKey:MarketID" json:"market,omitempty"`
+	Name        string  `gorm:"type:varchar(100);not null" json:"name"`
+	Description string  `gorm:"type:text" json:"description"`
+	Price       float64 `gorm:"type:decimal(10,2);not null" json:"price"`
+	Stock       int     `json:"stock"`
+	CategoryID  uint    `json:"category_id"`
+	MarketID    uint    `gorm:"foreignKey:MarketID" json:"market_id,omitempty"`
+	// Category    Category `gorm:"foreignKey:CategoryID" json:"category,omitempty"`
 }
 
 type Category struct {

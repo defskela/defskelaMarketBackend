@@ -17,7 +17,7 @@ func InitDB(connectionData string) *gorm.DB {
 		log.Fatal("Failed to connect to the database:", err)
 	}
 
-	// db.Migrator().DropTable(&models.Market{})
+	// db.Migrator().DropTable(&models.Product{})
 
 	db.AutoMigrate(&models.User{}, &models.Product{}, &models.Category{}, &models.Order{}, &models.Cart{}, &models.Market{})
 	log.Println("Database connected")

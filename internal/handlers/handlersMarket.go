@@ -58,26 +58,3 @@ func (handler *Handler) CreateMarkets(context *gin.Context) {
 		"products": marketsData.Markets,
 	})
 }
-
-// @Summary Продукты по marketID
-// @Description Данный запрос позволяет получить список товаров магазина по id магазина
-// @Tags products, markets
-// @Accept json
-// @Produce json
-// @Param market_id path int true "Market ID"
-// @Router /products/{market_id} [get]
-func (handler *Handler) GetProductsByMarketID(context *gin.Context) {
-	var products []models.Product
-	marketID := context.Param("market_id")
-
-	if err := handler.DB.Where("market_id = ?", marketID).Find(&products).Error; err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Магазин с таким id не найден"})
-		return
-	}
-
-	if len(products) == 0 {
-		context.JSON(http.StatusOK, gin.H{"message": "В магазине с таким id не найдены продукты" + marketID})
-		return
-	}
-	context.JSON(http.StatusOK, products)
-}
