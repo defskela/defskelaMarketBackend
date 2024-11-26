@@ -85,7 +85,50 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/createMarket": {
+        "/categories": {
+            "get": {
+                "description": "Данный запрос позволяет получить список всех категорий",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Все категории",
+                "responses": {}
+            }
+        },
+        "/createCategories": {
+            "post": {
+                "description": "Данный запрос позволяет создать категорию, если формат данных соответствует структуре models.Category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Создание категории",
+                "parameters": [
+                    {
+                        "description": "Categories data",
+                        "name": "categories",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.categoriesArray"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/createMarkets": {
             "post": {
                 "description": "Данный запрос позволяет создать магазин, если формат данных соответствует структуре models.Market",
                 "consumes": [
@@ -100,36 +143,21 @@ const docTemplate = `{
                 "summary": "Создание магазина",
                 "parameters": [
                     {
-                        "description": "Market data",
+                        "description": "Markets data",
                         "name": "market",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Market"
+                            "$ref": "#/definitions/handlers.marketsArray"
                         }
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
+                "responses": {}
             }
         },
-        "/createProduct": {
+        "/createProducts": {
             "post": {
-                "description": "Данный запрос позволяет создать продукт, если формат данных соответствует структуре models.Product",
+                "description": "Создает несколько продуктов за один запрос",
                 "consumes": [
                     "application/json"
                 ],
@@ -139,15 +167,15 @@ const docTemplate = `{
                 "tags": [
                     "products"
                 ],
-                "summary": "Создание продукта",
+                "summary": "Создание нескольких продуктов",
                 "parameters": [
                     {
-                        "description": "Product data",
-                        "name": "market",
+                        "description": "Array of products",
+                        "name": "products",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Product"
+                            "$ref": "#/definitions/handlers.productsArray"
                         }
                     }
                 ],
@@ -167,29 +195,7 @@ const docTemplate = `{
                     "markets"
                 ],
                 "summary": "Все магазины",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
+                "responses": {}
             }
         },
         "/products": {
@@ -263,6 +269,15 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.categoriesArray": {
+            "type": "object"
+        },
+        "handlers.marketsArray": {
+            "type": "object"
+        },
+        "handlers.productsArray": {
+            "type": "object"
+        },
         "handlers.registrationData": {
             "type": "object",
             "required": [
@@ -281,12 +296,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "models.Market": {
-            "type": "object"
-        },
-        "models.Product": {
-            "type": "object"
         }
     },
     "securityDefinitions": {

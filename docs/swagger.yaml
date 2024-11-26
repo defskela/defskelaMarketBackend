@@ -6,6 +6,12 @@ definitions:
     required:
     - otp
     type: object
+  handlers.categoriesArray:
+    type: object
+  handlers.marketsArray:
+    type: object
+  handlers.productsArray:
+    type: object
   handlers.registrationData:
     properties:
       email:
@@ -18,10 +24,6 @@ definitions:
     - email
     - password
     - username
-    type: object
-  models.Market:
-    type: object
-  models.Product:
     type: object
 host: localhost:8080
 info:
@@ -76,52 +78,71 @@ paths:
       tags:
       - users
       - auth
-  /createMarket:
+  /categories:
+    get:
+      consumes:
+      - application/json
+      description: Данный запрос позволяет получить список всех категорий
+      produces:
+      - application/json
+      responses: {}
+      summary: Все категории
+      tags:
+      - categories
+  /createCategories:
+    post:
+      consumes:
+      - application/json
+      description: Данный запрос позволяет создать категорию, если формат данных соответствует
+        структуре models.Category
+      parameters:
+      - description: Categories data
+        in: body
+        name: categories
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.categoriesArray'
+      produces:
+      - application/json
+      responses: {}
+      summary: Создание категории
+      tags:
+      - categories
+  /createMarkets:
     post:
       consumes:
       - application/json
       description: Данный запрос позволяет создать магазин, если формат данных соответствует
         структуре models.Market
       parameters:
-      - description: Market data
+      - description: Markets data
         in: body
         name: market
         required: true
         schema:
-          $ref: '#/definitions/models.Market'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Создание магазина
-      tags:
-      - markets
-  /createProduct:
-    post:
-      consumes:
-      - application/json
-      description: Данный запрос позволяет создать продукт, если формат данных соответствует
-        структуре models.Product
-      parameters:
-      - description: Product data
-        in: body
-        name: market
-        required: true
-        schema:
-          $ref: '#/definitions/models.Product'
+          $ref: '#/definitions/handlers.marketsArray'
       produces:
       - application/json
       responses: {}
-      summary: Создание продукта
+      summary: Создание магазина
+      tags:
+      - markets
+  /createProducts:
+    post:
+      consumes:
+      - application/json
+      description: Создает несколько продуктов за один запрос
+      parameters:
+      - description: Array of products
+        in: body
+        name: products
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.productsArray'
+      produces:
+      - application/json
+      responses: {}
+      summary: Создание нескольких продуктов
       tags:
       - products
   /markets:
@@ -132,22 +153,7 @@ paths:
         и товаров внутри них
       produces:
       - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
+      responses: {}
       summary: Все магазины
       tags:
       - markets

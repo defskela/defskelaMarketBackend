@@ -11,6 +11,8 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// swag init -g ./internal/router/router.go
+
 // @title My API
 // @version 1.0
 // @description This is a sample server for My API.
@@ -39,10 +41,12 @@ func InitRouter(handler *handlers.Handler) {
 	router.GET("/users", handler.GetAllUsers)
 	router.GET("/markets", handler.GetAllMarkets)
 	router.GET("/products", handler.GetAllProducts)
+	router.GET("/categories", handler.GetAllCategories)
 	router.GET("/products/:market_id", handler.GetProductsByMarketID)
 
-	router.POST("/createMarket", handler.CreateMarket)
-	router.POST("/createProduct", handler.CreateProduct)
+	router.POST("/createMarkets", handler.CreateMarkets)
+	router.POST("/createProducts", handler.CreateProducts)
+	router.POST("/createCategories", handler.CreateCategories)
 
 	auth := router.Group("/auth")
 	{

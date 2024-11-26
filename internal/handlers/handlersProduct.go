@@ -24,20 +24,38 @@ func (handler *Handler) GetAllProducts(context *gin.Context) {
 	context.JSON(http.StatusOK, products)
 }
 
-// @Summary Создание продукта
-// @Description Данный запрос позволяет создать продукт, если формат данных соответствует структуре models.Product
+type productsArray struct {
+	Products []models.Product `json:"products" binding:"required"`
+}
+
+// Добавьте новый handler
+// @Summary Создание нескольких продуктов
+// @Description Создает несколько продуктов за один запрос
 // @Tags products
 // @Accept json
 // @Produce json
-// @Param market body models.Product true "Product data"
-// @Router /createProduct [post]
-func (handler *Handler) CreateProduct(context *gin.Context) {
-	var product models.Product
-	if err := context.ShouldBindJSON(&product); err != nil {
+// @Param products body productsArray true "Array of products"
+// @Router /createProducts [post]
+func (handler *Handler) CreateProducts(context *gin.Context) {
+	var productsData productsArray
+	if err := context.ShouldBindJSON(&productsData); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	handler.DB.Create(&product)
-	context.JSON(http.StatusOK, product)
-	fmt.Println("Product created")
+
+	// Создаем все продукты в транзакции
+	tx := handler.DB.Begin()
+	for _, product := range productsData.Products {
+		if err := tx.Create(&product).Error; err != nil {
+			tx.Rollback()
+			context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+	tx.Commit()
+
+	context.JSON(http.StatusOK, gin.H{
+		"message":  fmt.Sprintf("Successfully created %d products", len(productsData.Products)),
+		"products": productsData.Products,
+	})
 }

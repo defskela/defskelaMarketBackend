@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"defskelaMarketBackend/internal/models"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,9 +13,6 @@ import (
 // @Tags markets
 // @Accept json
 // @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
 // @Router /markets [get]
 func (handler *Handler) GetAllMarkets(context *gin.Context) {
 	var markets []models.Market
@@ -26,23 +24,39 @@ func (handler *Handler) GetAllMarkets(context *gin.Context) {
 	context.JSON(http.StatusOK, markets)
 }
 
+type marketsArray struct {
+	Markets []models.Market `json:"markets" binding:"required"`
+}
+
 // @Summary Создание магазина
 // @Description Данный запрос позволяет создать магазин, если формат данных соответствует структуре models.Market
 // @Tags markets
 // @Accept json
 // @Produce json
-// @Param market body models.Market true "Market data"
-// @Success 200 {object} map[string]interface{}
-// @Failure 400 {object} map[string]interface{}
-// @Router /createMarket [post]
-func (handler *Handler) CreateMarket(context *gin.Context) {
-	var market models.Market
-	if err := context.ShouldBindJSON(&market); err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Неверная структура данных (CreateMarket)"})
+// @Param market body marketsArray true "Markets data"
+// @Router /createMarkets [post]
+func (handler *Handler) CreateMarkets(context *gin.Context) {
+	var marketsData marketsArray
+	if err := context.ShouldBindJSON(&marketsData); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	handler.DB.Create(&market)
-	context.JSON(http.StatusOK, market)
+
+	// Создаем все продукты в транзакции
+	tx := handler.DB.Begin()
+	for _, market := range marketsData.Markets {
+		if err := tx.Create(&market).Error; err != nil {
+			tx.Rollback()
+			context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+	tx.Commit()
+
+	context.JSON(http.StatusOK, gin.H{
+		"message":  fmt.Sprintf("Successfully created %d markets", len(marketsData.Markets)),
+		"products": marketsData.Markets,
+	})
 }
 
 // @Summary Продукты по marketID
