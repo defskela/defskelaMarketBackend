@@ -20,6 +20,38 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/addProductToCart": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Требуется авторизация для работы с данным обработчиком для получения cart по user_id из токена",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cart"
+                ],
+                "summary": "Добавление товара в корзину",
+                "parameters": [
+                    {
+                        "description": "addCartRequest data",
+                        "name": "addCartRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.addCartRequest"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/auth/otp-code": {
             "post": {
                 "security": [
@@ -266,6 +298,17 @@ const docTemplate = `{
             "properties": {
                 "otp": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.addCartRequest": {
+            "type": "object",
+            "required": [
+                "product_id"
+            ],
+            "properties": {
+                "product_id": {
+                    "type": "integer"
                 }
             }
         },

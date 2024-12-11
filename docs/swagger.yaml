@@ -6,6 +6,13 @@ definitions:
     required:
     - otp
     type: object
+  handlers.addCartRequest:
+    properties:
+      product_id:
+        type: integer
+    required:
+    - product_id
+    type: object
   handlers.categoriesArray:
     type: object
   handlers.marketsArray:
@@ -36,6 +43,27 @@ info:
   title: My API
   version: "1.0"
 paths:
+  /addProductToCart:
+    post:
+      consumes:
+      - application/json
+      description: Требуется авторизация для работы с данным обработчиком для получения
+        cart по user_id из токена
+      parameters:
+      - description: addCartRequest data
+        in: body
+        name: addCartRequest
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.addCartRequest'
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - BearerAuth: []
+      summary: Добавление товара в корзину
+      tags:
+      - cart
   /auth/otp-code:
     post:
       consumes:

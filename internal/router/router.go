@@ -49,6 +49,7 @@ func InitRouter(handler *handlers.Handler) {
 	router.POST("/createCategories", handler.CreateCategories)
 
 	router.Use(middlewares.AuthMiddleware())
+	router.POST("/addProductToCart", handler.AddProductToCart)
 	auth := router.Group("/auth")
 	{
 		auth.POST("/registration", handler.Registration)
