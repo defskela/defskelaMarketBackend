@@ -3,6 +3,7 @@ package handlers
 import (
 	"defskelaMarketBackend/internal/models"
 	"defskelaMarketBackend/utils"
+	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -56,6 +57,7 @@ func (handler *Handler) IsTrueOTP(context *gin.Context) {
 	}
 
 	userID, exists := context.Get("user_id")
+	fmt.Println(userID)
 	if !exists {
 		context.JSON(http.StatusUnauthorized, gin.H{"error": "Непредвиденная ошибка получения id, повторите попытку"})
 		return
@@ -67,15 +69,20 @@ func (handler *Handler) IsTrueOTP(context *gin.Context) {
 		context.JSON(http.StatusNotFound, gin.H{"error": "Пользователь не найден"})
 		return
 	}
-
-	user.IsActive = true
-	if err := handler.DB.Save(&user).Error; err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при обработке otp-кода, повторите попытку"})
+	if otp.OTP == user.OTP {
+		user.IsActive = true
+		if err := handler.DB.Save(&user).Error; err != nil {
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при обработке otp-кода, повторите попытку"})
+			return
+		}
+		context.JSON(http.StatusOK, gin.H{
+			"message": "user activated",
+			"user":    user,
+		})
 		return
 	}
 	context.JSON(http.StatusOK, gin.H{
-		"message": "user activated",
-		"user":    user,
+		"message": "otp-код не совпадает",
 	})
 	return
 }
@@ -183,6 +190,7 @@ func (handler *Handler) Registration(context *gin.Context) {
 			"message": "User registered but email verification failed",
 			"user_id": user.ID,
 			"token":   token,
+			"error":   err.Error(),
 		})
 		return
 	}

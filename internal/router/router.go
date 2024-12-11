@@ -48,12 +48,10 @@ func InitRouter(handler *handlers.Handler) {
 	router.POST("/createProducts", handler.CreateProducts)
 	router.POST("/createCategories", handler.CreateCategories)
 
+	router.Use(middlewares.AuthMiddleware())
 	auth := router.Group("/auth")
 	{
 		auth.POST("/registration", handler.Registration)
-
-		// Для получения id из токена
-		router.Use(middlewares.AuthMiddleware())
 
 		auth.POST("/otp-code", handler.IsTrueOTP)
 		auth.POST("/login", handler.Login)
