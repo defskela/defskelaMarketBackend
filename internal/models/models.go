@@ -49,7 +49,8 @@ type Order struct {
 
 type Cart struct {
 	gorm.Model
-	UserID uint `gorm:"unique" json:"user_id"`
+	UserID   uint      `gorm:"unique" json:"user_id"`
+	Products []Product `gorm:"many2many:cart_products;" json:"products,omitempty"`
 }
 
 type Market struct {
