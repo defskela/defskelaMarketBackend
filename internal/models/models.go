@@ -57,6 +57,7 @@ type Cart struct {
 	gorm.Model
 	UserID       uint      `gorm:"unique" json:"user_id"`
 	Products     []Product `gorm:"many2many:cart_products;joinForeignKey:CartID;JoinReferences:ProductID" json:"products,omitempty"`
+	TotalAmount  float64   `gorm:"type:decimal(10,2);not null" json:"total_amount"`
 	CartProducts []CartProduct
 }
 

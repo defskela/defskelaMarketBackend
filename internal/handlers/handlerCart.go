@@ -63,23 +63,47 @@ func (handler *Handler) AddProductToCart(context *gin.Context) {
 	var cartProduct models.CartProduct
 	result = handler.DB.Where("cart_id = ? AND product_id = ?", cart.ID, product.ID).First(&cartProduct)
 
+	tx := handler.DB.Begin()
+
 	if result.Error == nil {
 		cartProduct.Quantity++
-		handler.DB.Save(&cartProduct)
+		if err := tx.Save(&cartProduct).Error; err != nil {
+			tx.Rollback()
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка обновления корзины"})
+			return
+		}
 	} else {
 		cartProduct = models.CartProduct{
 			CartID:    cart.ID,
 			ProductID: product.ID,
 			Quantity:  1,
 		}
-		handler.DB.Create(&cartProduct)
-		handler.DB.Model(&cart).Association("Products").Append(product)
+		if err := tx.Create(&cartProduct).Error; err != nil {
+			tx.Rollback()
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка создания корзины"})
+			return
+		}
+		if err := tx.Model(&cart).Association("Products").Append(product); err != nil {
+			tx.Rollback()
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка добавления продукта"})
+			return
+		}
 	}
+	cart.TotalAmount += product.Price
+
+	if err := tx.Save(&cart).Error; err != nil {
+		tx.Rollback()
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка сохранения корзины"})
+		return
+	}
+
+	tx.Commit()
 
 	handler.DB.Preload("Products").Preload("CartProducts").First(&cart, cart.ID)
 
 	context.JSON(http.StatusOK, gin.H{
-		"message": fmt.Sprintf("Продукт с id %d успешно добавлен в корзину", cartReq.ProductID),
-		"cart":    cart.CartProducts,
+		"message":     fmt.Sprintf("Продукт с id %d успешно добавлен в корзину", cartReq.ProductID),
+		"cart":        cart.CartProducts,
+		"totalAmount": cart.TotalAmount,
 	})
 }
