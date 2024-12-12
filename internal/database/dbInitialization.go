@@ -19,7 +19,7 @@ func InitDB(connectionData string) *gorm.DB {
 
 	// db.Migrator().DropTable(&models.Product{})
 
-	db.AutoMigrate(&models.User{}, &models.Product{}, &models.Category{}, &models.Order{}, &models.Cart{}, &models.Market{})
+	db.AutoMigrate(&models.User{}, &models.Product{}, &models.Category{}, &models.Order{}, &models.Cart{}, &models.Market{}, &models.CartProduct{})
 	log.Println("Database connected")
 	return db
 }

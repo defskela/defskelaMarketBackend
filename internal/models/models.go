@@ -47,10 +47,17 @@ type Order struct {
 	Status      string  `gorm:"type:varchar(20)" json:"status"`
 }
 
+type CartProduct struct {
+	CartID    uint `gorm:"primaryKey"`
+	ProductID uint `gorm:"primaryKey"`
+	Quantity  int  `gorm:"default:1"`
+}
+
 type Cart struct {
 	gorm.Model
-	UserID   uint      `gorm:"unique" json:"user_id"`
-	Products []Product `gorm:"many2many:cart_products;" json:"products,omitempty"`
+	UserID       uint      `gorm:"unique" json:"user_id"`
+	Products     []Product `gorm:"many2many:cart_products;joinForeignKey:CartID;JoinReferences:ProductID" json:"products,omitempty"`
+	CartProducts []CartProduct
 }
 
 type Market struct {
