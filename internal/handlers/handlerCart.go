@@ -48,10 +48,27 @@ func (handler *Handler) AddProductToCart(context *gin.Context) {
 		return
 	}
 
-	user.Cart.Products = append(user.Cart.Products, *product)
+	var cart models.Cart
+	result = handler.DB.Preload("Products").Where("user_id = ?", userID).First(&cart)
+	if result.Error != nil {
+		cart = models.Cart{
+			UserID: userID.(uint),
+		}
+		if err := handler.DB.Create(&cart).Error; err != nil {
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка создания корзины"})
+			return
+		}
+	}
+
+	if err := handler.DB.Model(&cart).Association("Products").Append(product); err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка добавления продукта в корзину"})
+		return
+	}
+
+	handler.DB.Preload("Products").First(&cart, cart.ID)
+
 	context.JSON(http.StatusOK, gin.H{
 		"message": fmt.Sprintf("Продукт с id %d успешно добавлен в корзину", cartReq.ProductID),
-		"cart":    user.Cart,
+		"cart":    cart,
 	})
-	handler.DB.Save(&user)
 }

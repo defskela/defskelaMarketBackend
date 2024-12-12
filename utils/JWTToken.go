@@ -29,7 +29,7 @@ func GenerateJWT(userID uint) (string, error) {
 func ValidateToken(tokenString string) (*jwt.Token, error) {
 	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
 
-	fmt.Printf("Validating token with secret key: %x\n", jwtSecretKey) // для отладки
+	// fmt.Printf("Validating token with secret key: %x\n", jwtSecretKey) // для отладки
 
 	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Проверяем метод подписи

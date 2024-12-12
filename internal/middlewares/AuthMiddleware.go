@@ -36,7 +36,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		token, err := utils.ValidateToken(bearerToken[1])
-		fmt.Println("TOKEN", token)
+		// fmt.Println("TOKEN", token)
 		if err != nil {
 			fmt.Println("ERR", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token. Auth no validate"})
