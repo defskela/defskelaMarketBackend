@@ -184,21 +184,22 @@ func (handler *Handler) Registration(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка сохранения данных"})
 		return
 	}
+	go func() {
+		if err := emailConfig.SendEmailOTP(user.Email, otp); err != nil {
+			context.JSON(http.StatusConflict, gin.H{
+				"message": "User registered but email verification failed",
+				"user_id": user.ID,
+				"token":   token,
+				"error":   err.Error(),
+			})
+			return
+		}
 
-	if err := emailConfig.SendEmailOTP(user.Email, otp); err != nil {
-		context.JSON(http.StatusConflict, gin.H{
-			"message": "User registered but email verification failed",
+		context.JSON(http.StatusOK, gin.H{
+			"message": "Registration successful. Please check your email for verification code",
+			"otp":     user.OTP,
 			"user_id": user.ID,
 			"token":   token,
-			"error":   err.Error(),
 		})
-		return
-	}
-
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Registration successful. Please check your email for verification code",
-		"otp":     user.OTP,
-		"user_id": user.ID,
-		"token":   token,
-	})
+	}()
 }
